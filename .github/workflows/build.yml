@@ -2,7 +2,7 @@ name: Build Go Client (Linux)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
 
 jobs:
