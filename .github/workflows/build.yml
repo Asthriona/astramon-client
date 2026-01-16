@@ -1,0 +1,30 @@
+name: Build Go Client (Linux)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - run: go mod download
+
+      - name: Build
+        env:
+          GOOS: linux
+          GOARCH: amd64
+        run: go build -o astramon-client
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: astramon-linux-amd64
+          path: astramon-client
