@@ -20,8 +20,8 @@ type Metrics struct {
 }
 
 const (
-    // DEVELOPMENT VALUE! REMEMBER TO UPDATE TO https://monitoring.asthriona.com/api/heartbeat IN PRODUCTION!
-    apiURL = "http://localhost:3000/api/heartbeat"
+    // DEVELOPMENT VALUE! REMEMBER TO UPDATE TO https://monitoring.asthriona.space/api/heartbeat IN PRODUCTION!
+    apiURL = "https://monitoring.asthriona.space/api/heartbeat"
     
     // Send metrics every 60 seconds
     sendInterval = 60 * time.Second
