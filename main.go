@@ -14,6 +14,7 @@ import (
 
 type Metrics struct {
     Hostname  string  `json:"hostname"`
+    IP        string  `json:"ip"`
     CPU       float64 `json:"cpu"`
     RAM       float64 `json:"ram"`
     Timestamp int64   `json:"timestamp"`
@@ -64,7 +65,31 @@ func main() {
     }
 }
 
+func getPublicIP(client *http.Client) (string, error) {
+    resp, err := client.Get("https://api.ipify.org?format=json")
+    if err != nil {
+        return "", fmt.Errorf("failed to get public IP: %w", err)
+    }
+    defer resp.Body.Close()
+    
+    var result struct {
+        IP string `json:"ip"`
+    }
+    
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return "", fmt.Errorf("failed to decode IP response: %w", err)
+    }
+    
+    return result.IP, nil
+}
+
 func sendMetrics(client *http.Client, hostname string) error {
+    // Get public IP
+    ip, err := getPublicIP(client)
+    if err != nil {
+        return fmt.Errorf("failed to get IP: %w", err)
+    }
+    
     // Get CPU percentage (sample over 1 second)
     cpuPercent, err := cpu.Percent(time.Second, false)
     if err != nil {
@@ -79,6 +104,7 @@ func sendMetrics(client *http.Client, hostname string) error {
     
     metrics := Metrics{
         Hostname:  hostname,
+        IP:        ip,
         CPU:       cpuPercent[0],
         RAM:       memInfo.UsedPercent,
         Timestamp: time.Now().Unix(),
@@ -102,6 +128,6 @@ func sendMetrics(client *http.Client, hostname string) error {
         return fmt.Errorf("server returned status %d", resp.StatusCode)
     }
     
-    log.Printf("✓ Sent metrics: CPU=%.1f%%, RAM=%.1f%%", metrics.CPU, metrics.RAM)
+    log.Printf("✓ Sent metrics: IP=%s, CPU=%.1f%%, RAM=%.1f%%", ip, metrics.CPU, metrics.RAM)
     return nil
 }
